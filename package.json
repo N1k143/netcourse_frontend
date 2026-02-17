@@ -1,0 +1,30 @@
+{
+  "name": "nuxt-netcourse-frontend",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/content": "^3.11.0",
+    "@nuxt/icon": "^2.2.1",
+    "@nuxtjs/mdc": "^0.20.1",
+    "highlight.js": "^11.11.1",
+    "isomorphic-dompurify": "^2.35.0",
+    "lucide-vue-next": "^0.563.0",
+    "marked": "^17.0.1",
+    "nuxt": "^4.3.0",
+    "shiki": "^3.22.0",
+    "vue": "^3.5.27",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@types/node": "^25.2.0",
+    "typescript": "^5.9.3"
+  }
+}

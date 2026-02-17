@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-emerald-500 text-slate-950 rounded-lg font-semibold
+    hover:bg-emerald-400 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-transparent text-emerald-500 rounded-lg font-semibold
+    border-2 border-emerald-500/50 hover:border-emerald-500
+    hover:bg-emerald-500/10 transition-all;
+  }
+
+  .card {
+    @apply bg-slate-800 rounded-lg shadow-md p-6
+    border border-emerald-500/20;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 bg-slate-800 border border-slate-700
+    rounded-lg text-white placeholder-slate-400
+    focus:outline-none focus:border-emerald-500 transition-colors;
+  }
+}
+
+@import 'highlight.js/styles/atom-one-dark.css';
