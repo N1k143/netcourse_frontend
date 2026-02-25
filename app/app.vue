@@ -8,6 +8,7 @@
 
 <script setup>
 
+
 const router = useRouter()
 
 if (process.client) {

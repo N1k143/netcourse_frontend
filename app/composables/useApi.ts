@@ -209,6 +209,54 @@ export const useApi = () => {
         })
   }
 
+  // ============ ЗНАЧКИ (BADGES) ============
+  const badgesAPI = {
+    // Получить все значки
+    getAll: () => apiRequest('/badges'),
+
+    // Получить значки текущего пользователя
+    getMyBadges: () => apiRequest('/badges/me'),
+
+    // Получить значки конкретного пользователя (admin)
+    getUserBadges: (userId: string | number) => apiRequest(`/admin/badges/users/${userId}`),
+  }
+
+  // ============ СЕРТИФИКАТЫ (CERTIFICATIONS) ============
+  const certificationsAPI = {
+    // Получить сертификаты текущего пользователя
+    getMyCertifications: () => apiRequest('/certifications/me'),
+
+    // Верифицировать сертификат по коду
+    verify: (code: string) => apiRequest(`/certifications/verify/${code}`),
+
+    // Получить сертификаты конкретного пользователя (admin)
+    getUserCertifications: (userId: string | number) => apiRequest(`/admin/certifications/users/${userId}`),
+  }
+
+  // ============ СОЦИАЛЬНЫЕ ССЫЛКИ (SOCIAL LINKS) ============
+  const socialLinksAPI = {
+    // Получить все ссылки текущего пользователя
+    getAll: () => apiRequest('/social-links'),
+
+    // Создать новую ссылку
+    // platform: "github" | "twitter" | "youtube" | "website" | "other"
+    create: (data: { platform: string; url: string }) => apiRequest('/social-links', {
+      method: 'POST',
+      body: data
+    }),
+
+    // Обновить ссылку
+    update: (id: string | number, data: { platform?: string; url?: string }) => apiRequest(`/social-links/${id}`, {
+      method: 'PUT',
+      body: data
+    }),
+
+    // Удалить ссылку
+    delete: (id: string | number) => apiRequest(`/social-links/${id}`, {
+      method: 'DELETE'
+    })
+  }
+
   // ============ СОКРАЩАТЕЛЬ ССЫЛОК ============
   const shortenerAPI = {
     getInfo: (short: string) => apiRequest(`/shorten/${short}`)
@@ -278,6 +326,9 @@ export const useApi = () => {
     lessonsAPI,
     progressAPI,
     quizzesAPI,
+    badgesAPI,
+    certificationsAPI,
+    socialLinksAPI,
     shortenerAPI,
     handleApiError,
     sanitizeData

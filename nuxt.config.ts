@@ -9,6 +9,11 @@ export default defineNuxtConfig({
     }
   ],
 
+  // Явно указываем папку composables для авто-импорта
+  imports: {
+    dirs: ['composables']
+  },
+
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxt/icon',

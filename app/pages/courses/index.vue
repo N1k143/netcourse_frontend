@@ -422,7 +422,7 @@ const handleEnroll = async (courseId) => {
   enrollingCourseId.value = courseId
 
   try {
-    await enrollmentsAPI.enroll(courseId, String(user.value.id))
+    await enrollmentsAPI.enroll(courseId, user.value.id)
     success('Вы успешно записаны на курс!')
     await loadCoursesWithEnrollment()
   } catch (err) {

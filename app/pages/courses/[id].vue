@@ -5,6 +5,16 @@
     </div>
     <div class="absolute inset-0 pointer-events-none overflow-hidden bg-[linear-gradient(to_right,#10b98120_1px,transparent_1px),linear-gradient(to_bottom,#10b98120_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
 
+    <!-- Модальное окно завершения курса (обновлённое) -->
+    <CourseCompletionModal
+      :show="showCompletionModal"
+      :courseTitle="course?.title || ''"
+      :certification="courseCertification"
+      :medal="courseMedal"
+      @close="showCompletionModal = false"
+      @equip="handleEquipMedal"
+    />
+
     <div class="max-w-7xl mx-auto relative z-10 w-full overflow-x-hidden">
       <div v-if="loading" class="flex items-center justify-center min-h-[50vh]">
         <div class="text-center">
@@ -31,10 +41,11 @@
           </h1>
           <p class="text-slate-400 font-mono text-sm max-w-3xl break-words">{{ course?.description }}</p>
 
-          <div v-if="courseProgress" class="mt-4 flex items-center gap-2">
+          <!-- Статус прогресса + кнопка сертификат -->
+          <div v-if="courseProgress" class="mt-4 flex items-center gap-3 flex-wrap">
             <span :class="[
               'px-2 py-1 rounded text-xs font-mono border',
-              courseProgress.status === 'completed' 
+              courseProgress.status === 'completed'
                 ? 'bg-green-500/20 text-green-500 border-green-500/30'
                 : courseProgress.status === 'in_progress'
                 ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30'
@@ -43,6 +54,16 @@
               {{ courseProgress.status === 'completed' ? 'КУРС ЗАВЕРШЕН' :
                  courseProgress.status === 'in_progress' ? 'В ПРОЦЕССЕ' : 'НЕ НАЧАТ' }}
             </span>
+
+            <!-- Кнопка открыть сертификат повторно -->
+            <button
+              v-if="courseProgress.status === 'completed'"
+              @click="showCompletionModal = true"
+              class="flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 hover:border-yellow-500/50 text-yellow-400 hover:text-yellow-300 rounded-lg font-mono text-xs transition-all"
+            >
+              <Icon name="mdi:certificate-outline" class="w-3.5 h-3.5" />
+              <span>Мой сертификат</span>
+            </button>
           </div>
         </div>
 
@@ -102,7 +123,7 @@
 <script setup>
 const route = useRoute()
 const router = useRouter()
-const { coursesAPI, sectionsAPI, lessonsAPI, progressAPI, authAPI } = useApi()
+const { coursesAPI, sectionsAPI, lessonsAPI, progressAPI, certificationsAPI, authAPI, badgesAPI } = useApi()  // добавлен badgesAPI
 
 const courseId = computed(() => route.params.id)
 
@@ -112,9 +133,21 @@ const lessonsBySection = ref({})
 const currentSectionId = ref(null)
 const currentLesson = ref(null)
 const courseProgress = ref(null)
+const courseCertification = ref(null)
+const courseMedal = ref(null)               // новая переменная для медали
 const loading = ref(true)
 const error = ref('')
 const showQuizView = ref(false)
+const showCompletionModal = ref(false)
+
+const loadCourseCertification = async () => {
+  try {
+    const certs = await certificationsAPI.getMyCertifications()
+    courseCertification.value = (certs || []).find(c => String(c.courseId) === String(courseId.value)) || null
+  } catch {
+    courseCertification.value = null
+  }
+}
 
 const loadCourseData = async () => {
   if (!courseId.value) {
@@ -142,6 +175,17 @@ const loadCourseData = async () => {
       } catch (err) {
         console.log('Прогресс курса не найден, создадим новый')
         courseProgress.value = null
+      }
+
+      // Загружаем сертификат если курс завершён
+      if (courseProgress.value?.status === 'completed') {
+        await loadCourseCertification()
+        // также загружаем медаль, если она есть (можно сразу получить)
+        try {
+          courseMedal.value = await badgesAPI.getBadgeForCourse(courseId.value)
+        } catch {
+          courseMedal.value = null
+        }
       }
     }
 
@@ -187,7 +231,7 @@ const handleLessonSelect = async (sectionId, lessonId) => {
   currentSectionId.value = sectionId
   currentLesson.value = lesson
   showQuizView.value = false
-  
+
   if (process.client) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -195,10 +239,10 @@ const handleLessonSelect = async (sectionId, lessonId) => {
 
 const getNextLesson = () => {
   if (!currentLesson.value || !currentSectionId.value) return null
-  
+
   const currentLessons = lessonsBySection.value[currentSectionId.value] || []
   const currentIndex = currentLessons.findIndex(l => l.id === currentLesson.value.id)
-  
+
   if (currentIndex < currentLessons.length - 1) {
     return {
       lesson: currentLessons[currentIndex + 1],
@@ -216,16 +260,16 @@ const getNextLesson = () => {
       }
     }
   }
-  
+
   return null
 }
 
 const getPrevLesson = () => {
   if (!currentLesson.value || !currentSectionId.value) return null
-  
+
   const currentLessons = lessonsBySection.value[currentSectionId.value] || []
   const currentIndex = currentLessons.findIndex(l => l.id === currentLesson.value.id)
-  
+
   if (currentIndex > 0) {
     return {
       lesson: currentLessons[currentIndex - 1],
@@ -243,8 +287,20 @@ const getPrevLesson = () => {
       }
     }
   }
-  
+
   return null
+}
+
+const handleEquipMedal = (medal) => {
+  if (!medal) return
+  const EQUIP_KEY = 'equippedBadge'
+  const current = JSON.parse(localStorage.getItem(EQUIP_KEY) || 'null')
+  if (current?.id === medal.id) {
+    localStorage.removeItem(EQUIP_KEY)
+  } else {
+    localStorage.setItem(EQUIP_KEY, JSON.stringify(medal))
+  }
+  window.dispatchEvent(new Event('badge-equipped'))
 }
 
 const handleMarkComplete = async (testResults = null) => {
@@ -263,6 +319,19 @@ const handleMarkComplete = async (testResults = null) => {
       ...courseProgress.value,
       ...progressData
     }
+
+    // Подгружаем сертификат
+    await loadCourseCertification()
+
+    // Загружаем медаль за курс (предполагается наличие метода)
+    try {
+      courseMedal.value = await badgesAPI.getBadgeForCourse(courseId.value)
+    } catch {
+      courseMedal.value = null
+    }
+
+    // Открываем модалку
+    showCompletionModal.value = true
 
     const nextLessonData = getNextLesson()
     if (nextLessonData) {
