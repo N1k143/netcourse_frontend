@@ -489,13 +489,22 @@ const downloadCertificate = async (code) => {
   try {
     const apiBase = config.public.apiBase || config.public.baseURL || ''
     const url = `${apiBase}/certifications/${code}/pdf`
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token') || ''
+
+    const response = await fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    if (!response.ok) { error.value = 'Ошибка скачивания'; return }
+
+    const blob = await response.blob()
+    const objectUrl = URL.createObjectURL(blob)
     const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', `certificate-${code}.pdf`)
-    link.setAttribute('target', '_blank')
+    link.href = objectUrl
+    link.download = `certificate-${code}.pdf`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
   } catch {
     error.value = 'Не удалось скачать сертификат'
   } finally {

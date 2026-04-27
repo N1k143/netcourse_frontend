@@ -14,15 +14,12 @@
       <div class="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded-full"></div>
       <div class="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 bg-yellow-500 rounded-full"></div>
       <div class="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
-      <span class="text-slate-500 font-mono text-[10px] xs:text-xs sm:text-sm">
-        lesson_viewer
-      </span>
+      <span class="text-slate-500 font-mono text-[10px] xs:text-xs sm:text-sm">lesson_viewer</span>
     </div>
 
     <!-- Content Area -->
     <div class="markdown-content min-h-[250px] xs:min-h-[300px] sm:min-h-[350px] md:min-h-[400px] mb-4 xs:mb-5 sm:mb-6 w-full overflow-hidden">
       <!-- Text Content -->
-      <!-- ИСПРАВЛЕНО: убран Suspense, используется :content проп вместо slot -->
       <div v-if="currentLesson.contentType === 'text' && currentLesson.textContent" class="w-full overflow-hidden">
         <MarkdownRenderer :content="currentLesson.textContent" />
       </div>
@@ -40,7 +37,6 @@
             allowfullscreen
             title="YouTube видео урока"
           />
-          
           <!-- Regular Video -->
           <video
             v-else
@@ -96,8 +92,9 @@
         <div class="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-slate-700"></div>
       </button>
 
-      <!-- Complete Button -->
+      <!-- Complete Button — скрывается когда курс уже завершён -->
       <button
+        v-if="!courseCompleted"
         @click="handleMarkComplete"
         :disabled="isMarkingComplete"
         class="px-3 py-2 xs:px-4 xs:py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-slate-950 rounded-lg font-mono text-xs xs:text-sm hover:from-emerald-500 hover:to-emerald-400 transition-all hover:shadow-lg hover:shadow-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed order-first sm:order-none relative overflow-hidden group/btn"
@@ -111,6 +108,12 @@
         </span>
         <div class="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-emerald-500 to-emerald-300"></div>
       </button>
+
+      <!-- Плейсхолдер когда курс завершён — чтобы prev/next не съехали -->
+      <div v-else class="px-3 py-2 xs:px-4 xs:py-2.5 sm:px-5 sm:py-3 flex items-center justify-center gap-2 text-emerald-500 font-mono text-xs xs:text-sm order-first sm:order-none">
+        <Icon name="mdi:check-circle" class="w-4 h-4" />
+        <span>// курс завершён</span>
+      </div>
 
       <!-- Next Button -->
       <button
@@ -129,43 +132,32 @@
 
 <script setup>
 const props = defineProps({
-  courseId: {
-    type: [String, Number],
-    required: true
-  },
-  currentSectionId: {
-    type: [String, Number],
-    default: null
-  },
-  currentLesson: {
-    type: Object,
-    default: () => ({})
-  }
+  courseId:        { type: [String, Number], required: true },
+  currentSectionId:{ type: [String, Number], default: null },
+  currentLesson:   { type: Object,           default: () => ({}) },
+  // ← новый проп: скрывает кнопку "завершить" когда курс уже пройден
+  courseCompleted: { type: Boolean,           default: false }
 })
 
 const emit = defineEmits(['mark-complete', 'navigate', 'open-test'])
 
 const { quizzesAPI } = useApi()
 
-// State
 const isMarkingComplete = ref(false)
-const hasQuiz = ref(false)
-const checkingQuiz = ref(true)
+const hasQuiz           = ref(false)
+const checkingQuiz      = ref(true)
 
-// Check for quiz
 const checkForQuiz = async () => {
   if (!props.courseId || !props.currentSectionId || !props.currentLesson?.id) {
     hasQuiz.value = false
     checkingQuiz.value = false
     return
   }
-
   checkingQuiz.value = true
   try {
     const quizzes = await quizzesAPI.getByLesson(props.courseId, props.currentSectionId, props.currentLesson.id)
     hasQuiz.value = quizzes && quizzes.length > 0
-  } catch (err) {
-    console.error('Ошибка проверки наличия тестов:', err)
+  } catch {
     hasQuiz.value = false
   } finally {
     checkingQuiz.value = false
@@ -174,7 +166,6 @@ const checkForQuiz = async () => {
 
 const handleMarkComplete = async () => {
   if (!props.courseId || !props.currentSectionId || !props.currentLesson) return
-
   isMarkingComplete.value = true
   try {
     await emit('mark-complete')
@@ -183,31 +174,25 @@ const handleMarkComplete = async () => {
   }
 }
 
-const handleOpenTest = () => {
-  emit('open-test')
-}
+const handleOpenTest = () => emit('open-test')
 
 const getYouTubeVideoId = (url) => {
   if (!url) return null
-
   const patterns = [
     /(?:youtube\.com\/watch\?v=)([^&\s]+)/,
     /(?:youtube\.com\/embed\/)([^&\s]+)/,
     /(?:youtu\.be\/)([^&\s]+)/,
   ]
-
-  for (const pattern of patterns) {
-    const match = url.match(pattern)
-    if (match && match[1]) {
-      return match[1]
-    }
+  for (const p of patterns) {
+    const m = url.match(p)
+    if (m?.[1]) return m[1]
   }
-  
   return null
 }
 
-// Watch for lesson changes
-watch(() => [props.courseId, props.currentSectionId, props.currentLesson], () => {
-  checkForQuiz()
-}, { immediate: true })
+watch(
+  () => [props.courseId, props.currentSectionId, props.currentLesson],
+  () => checkForQuiz(),
+  { immediate: true }
+)
 </script>

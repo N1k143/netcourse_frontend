@@ -100,6 +100,7 @@
               :courseId="courseId"
               :currentSectionId="currentSectionId"
               :currentLesson="currentLesson"
+              :courseCompleted="courseProgress?.status === 'completed'"  
               @mark-complete="handleMarkComplete"
               @navigate="handleNavigate"
               @open-test="handleOpenTest"

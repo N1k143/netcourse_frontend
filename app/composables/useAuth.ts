@@ -104,20 +104,29 @@ export const useAuth = () => {
 
   const register = async (data: RegisterData, redirectPath = '/login'): Promise<void> => {
     loading.value = true
-    
     try {
       const cleanData = sanitizeData(data)
       const response = await authAPI.register(cleanData)
 
-      console.log('Register response:', response)
-
-      // Проверяем есть ли токен в ответе
       let authToken = response.token || response.accessToken || response.data?.token
-      
-      if (authToken) {
-        // Если есть токен - делаем автоматический вход
-        let userData = response.user || response.data?.user || response
 
+      // Если токена нет – делаем автоматический вход
+      if (!authToken) {
+        const loginResponse = await authAPI.login({ email: data.email, password: data.password })
+        authToken = loginResponse.token || loginResponse.accessToken || loginResponse.data?.token
+        if (!authToken) throw new Error('Не удалось получить токен авторизации после регистрации')
+        const userData = loginResponse.user || loginResponse.data?.user || response.user
+        token.value = authToken
+        user.value = userData || {
+          id: response.user?.id,
+          email: data.email,
+          username: data.username,
+          role: response.user?.role,
+          avatarUrl: response.user?.avatarUrl
+        }
+        authAPI.saveAuthData(authToken, user.value)
+      } else {
+        let userData = response.user || response.data?.user || response
         if (!userData || !userData.email) {
           userData = {
             id: response.id,
@@ -127,23 +136,18 @@ export const useAuth = () => {
             avatarUrl: response.avatarUrl || response.avatar_url
           }
         }
-
         token.value = authToken
         user.value = userData
-        
         authAPI.saveAuthData(authToken, userData)
-
-        await navigateTo('/courses')
-      } else {
-        // Если токена нет - перенаправляем на страницу логина
-        await navigateTo({
-          path: '/login',
-          query: {
-            message: 'Регистрация успешна! Войдите в систему.'
-          }
-        })
       }
 
+      // ФЛАГ ДЛЯ МОДАЛКИ
+      if (process.client) {
+        localStorage.setItem('justRegistered', 'true')
+      }
+
+      // Перенаправляем на главную, чтобы показать InterestModal
+      await navigateTo('/')
     } catch (error: any) {
       console.error('Register error:', error)
       throw error

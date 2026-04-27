@@ -24,92 +24,104 @@
           {{ '<О нас/>' }}
         </NuxtLink>
 
-        <div v-if="isAuthenticated" class="flex items-center gap-4">
-          <div class="relative">
-            <button
-              @click="toggleProfileMenu"
-              class="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-800/50 transition-colors"
-            >
-              <div class="w-8 h-8 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center overflow-hidden">
-                <img 
-                  v-if="currentUser?.avatarUrl"
-                  :src="currentUser.avatarUrl" 
-                  alt="Аватар"
-                  class="w-full h-full object-cover"
-                />
-                <span v-else class="text-sm text-emerald-500 font-mono font-bold">
-                  {{ currentUser?.username?.charAt(0).toUpperCase() || 'U' }}
-                </span>
-              </div>
-              <span class="text-slate-300 text-sm font-mono hidden lg:block max-w-[120px] truncate">
-                {{ currentUser?.username }}
-              </span>
-            </button>
-
-            <!-- Profile Dropdown -->
-            <Transition
-              enter-active-class="transition ease-out duration-100"
-              enter-from-class="transform opacity-0 scale-95"
-              enter-to-class="transform opacity-100 scale-100"
-              leave-active-class="transition ease-in duration-75"
-              leave-from-class="transform opacity-100 scale-100"
-              leave-to-class="transform opacity-0 scale-95"
-            >
-              <div v-if="isProfileMenuOpen" class="absolute top-full right-0 mt-2 w-48 bg-slate-900/95 backdrop-blur-md border border-emerald-500/30 rounded-lg shadow-lg py-2 z-50">
+        <ClientOnly>
+          <template v-if="isAuthenticated">
+            <div class="flex items-center gap-4">
+              <div class="relative">
                 <button
-                  @click="handleProfileClick"
-                  class="w-full px-4 py-2 text-slate-300 hover:bg-slate-800/50 transition-colors text-left font-mono text-sm flex items-center gap-2"
+                  @click="toggleProfileMenu"
+                  class="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-800/50 transition-colors"
                 >
-                  <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                  Профиль
+                  <div class="w-8 h-8 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center overflow-hidden">
+                    <img
+                      v-if="currentUser?.avatarUrl"
+                      :src="currentUser.avatarUrl"
+                      alt="Аватар"
+                      class="w-full h-full object-cover"
+                    />
+                    <span v-else class="text-sm text-emerald-500 font-mono font-bold">
+                      {{ currentUser?.username?.charAt(0).toUpperCase() || 'U' }}
+                    </span>
+                  </div>
+                  <span class="text-slate-300 text-sm font-mono hidden lg:block max-w-[120px] truncate">
+                    {{ currentUser?.username }}
+                  </span>
                 </button>
-                <button
-                  @click="handleLogout"
-                  class="w-full px-4 py-2 text-red-400 hover:bg-red-500/10 transition-colors text-left font-mono text-sm flex items-center gap-2"
-                >
-                  <svg class="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                  </svg>
-                  Выйти
-                </button>
-              </div>
-            </Transition>
-          </div>
-        </div>
 
-        <NuxtLink 
-          v-else
-          to="/login" 
-          class="px-4 sm:px-5 py-2 bg-emerald-500 text-slate-950 rounded-lg font-semibold hover:bg-emerald-400 transition-colors font-mono text-sm"
-        >
-          $ login
-        </NuxtLink>
+                <!-- Profile Dropdown -->
+                <Transition
+                  enter-active-class="transition ease-out duration-100"
+                  enter-from-class="transform opacity-0 scale-95"
+                  enter-to-class="transform opacity-100 scale-100"
+                  leave-active-class="transition ease-in duration-75"
+                  leave-from-class="transform opacity-100 scale-100"
+                  leave-to-class="transform opacity-0 scale-95"
+                >
+                  <div v-if="isProfileMenuOpen" class="absolute top-full right-0 mt-2 w-48 bg-slate-900/95 backdrop-blur-md border border-emerald-500/30 rounded-lg shadow-lg py-2 z-50">
+                    <button
+                      @click="handleProfileClick"
+                      class="w-full px-4 py-2 text-slate-300 hover:bg-slate-800/50 transition-colors text-left font-mono text-sm flex items-center gap-2"
+                    >
+                      <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                      Профиль
+                    </button>
+                    <button
+                      @click="handleLogout"
+                      class="w-full px-4 py-2 text-red-400 hover:bg-red-500/10 transition-colors text-left font-mono text-sm flex items-center gap-2"
+                    >
+                      <svg class="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                      </svg>
+                      Выйти
+                    </button>
+                  </div>
+                </Transition>
+              </div>
+            </div>
+          </template>
+          <template v-else>
+            <NuxtLink
+              to="/login"
+              class="px-4 sm:px-5 py-2 bg-emerald-500 text-slate-950 rounded-lg font-semibold hover:bg-emerald-400 transition-colors font-mono text-sm"
+            >
+              $ login
+            </NuxtLink>
+          </template>
+          <template #fallback>
+            <NuxtLink
+              to="/login"
+              class="px-4 sm:px-5 py-2 bg-emerald-500 text-slate-950 rounded-lg font-semibold hover:bg-emerald-400 transition-colors font-mono text-sm"
+            >
+              $ login
+            </NuxtLink>
+          </template>
+        </ClientOnly>
       </div>
 
-      <!-- Mobile Menu Button (Исправленная анимация в крестик) -->
+      <!-- Mobile Menu Button -->
       <button
         class="md:hidden flex flex-col items-center justify-center w-8 h-8 relative"
         @click="toggleMobileMenu"
         aria-label="Открыть меню"
       >
-        <span 
+        <span
           :class="[
             'absolute w-6 h-0.5 bg-emerald-500 transition-all duration-300 ease-in-out',
             isMobileMenuOpen ? 'rotate-45' : '-translate-y-2'
           ]"
         ></span>
-        <span 
+        <span
           :class="[
             'absolute w-6 h-0.5 bg-emerald-500 transition-all duration-300 ease-in-out',
             isMobileMenuOpen ? 'opacity-0' : 'opacity-100'
           ]"
         ></span>
-        <span 
+        <span
           :class="[
             'absolute w-6 h-0.5 bg-emerald-500 transition-all duration-300 ease-in-out',
             isMobileMenuOpen ? '-rotate-45' : 'translate-y-2'
@@ -147,48 +159,63 @@
             {{ '<О нас/>' }}
           </NuxtLink>
 
-          <div v-if="isAuthenticated" class="flex flex-col gap-3 pt-4 border-t border-emerald-500/20">
-            <div class="flex items-center justify-center gap-3 py-2">
-              <div class="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center overflow-hidden">
-                <img 
-                  v-if="currentUser?.avatarUrl"
-                  :src="currentUser.avatarUrl" 
-                  alt="Аватар"
-                  class="w-full h-full object-cover"
-                />
-                <span v-else class="text-lg text-emerald-500 font-mono font-bold">
-                  {{ currentUser?.username?.charAt(0).toUpperCase() || 'U' }}
-                </span>
+          <ClientOnly>
+            <template v-if="isAuthenticated">
+              <div class="flex flex-col gap-3 pt-4 border-t border-emerald-500/20">
+                <div class="flex items-center justify-center gap-3 py-2">
+                  <div class="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center overflow-hidden">
+                    <img
+                      v-if="currentUser?.avatarUrl"
+                      :src="currentUser.avatarUrl"
+                      alt="Аватар"
+                      class="w-full h-full object-cover"
+                    />
+                    <span v-else class="text-lg text-emerald-500 font-mono font-bold">
+                      {{ currentUser?.username?.charAt(0).toUpperCase() || 'U' }}
+                    </span>
+                  </div>
+                  <span class="text-slate-300 font-mono text-sm sm:text-base max-w-[150px] truncate">
+                    {{ currentUser?.username }}
+                  </span>
+                </div>
+
+                <NuxtLink
+                  to="/profile"
+                  class="px-6 py-2.5 bg-emerald-500 text-slate-950 rounded-lg font-semibold hover:bg-emerald-400 transition-colors font-mono text-base text-center"
+                  @click="closeMobileMenu"
+                >
+                  $ profile
+                </NuxtLink>
+                <button
+                  @click="handleLogoutMobile"
+                  class="px-6 py-2.5 bg-transparent text-red-400 rounded-lg font-semibold hover:bg-red-500/10 transition-colors font-mono text-base border border-red-500/50"
+                >
+                  $ logout
+                </button>
               </div>
-              <span class="text-slate-300 font-mono text-sm sm:text-base max-w-[150px] truncate">
-                {{ currentUser?.username }}
-              </span>
-            </div>
-
-            <NuxtLink
-              to="/profile"
-              class="px-6 py-2.5 bg-emerald-500 text-slate-950 rounded-lg font-semibold hover:bg-emerald-400 transition-colors font-mono text-base text-center"
-              @click="closeMobileMenu"
-            >
-              $ profile
-            </NuxtLink>
-            <button
-              @click="handleLogoutMobile"
-              class="px-6 py-2.5 bg-transparent text-red-400 rounded-lg font-semibold hover:bg-red-500/10 transition-colors font-mono text-base border border-red-500/50"
-            >
-              $ logout
-            </button>
-          </div>
-
-          <div v-else class="flex justify-center pt-4">
-            <NuxtLink
-              to="/login"
-              class="px-8 py-3 bg-emerald-500 text-slate-950 rounded-lg font-semibold hover:bg-emerald-400 transition-colors font-mono text-base"
-              @click="closeMobileMenu"
-            >
-              $ login
-            </NuxtLink>
-          </div>
+            </template>
+            <template v-else>
+              <div class="flex justify-center pt-4">
+                <NuxtLink
+                  to="/login"
+                  class="px-8 py-3 bg-emerald-500 text-slate-950 rounded-lg font-semibold hover:bg-emerald-400 transition-colors font-mono text-base"
+                  @click="closeMobileMenu"
+                >
+                  $ login
+                </NuxtLink>
+              </div>
+            </template>
+            <template #fallback>
+              <div class="flex justify-center pt-4">
+                <NuxtLink
+                  to="/login"
+                  class="px-8 py-3 bg-emerald-500 text-slate-950 rounded-lg font-semibold hover:bg-emerald-400 transition-colors font-mono text-base"
+                >
+                  $ login
+                </NuxtLink>
+              </div>
+            </template>
+          </ClientOnly>
         </div>
       </div>
     </Transition>
@@ -203,9 +230,9 @@
     leave-from-class="opacity-100"
     leave-to-class="opacity-0"
   >
-    <div 
+    <div
       v-if="isProfileMenuOpen"
-      class="fixed inset-0 z-40" 
+      class="fixed inset-0 z-40"
       @click="closeProfileMenu"
     />
   </Transition>
@@ -217,7 +244,6 @@ const { user, isAuthenticated, logout } = useAuth()
 const isMobileMenuOpen = ref(false)
 const isProfileMenuOpen = ref(false)
 
-// Используем computed для получения актуального пользователя
 const currentUser = computed(() => user.value)
 
 const toggleMobileMenu = () => {
@@ -256,7 +282,6 @@ const handleLogoutMobile = async () => {
   closeMobileMenu()
 }
 
-// Закрываем меню при изменении роута
 const route = useRoute()
 watch(() => route.path, () => {
   closeMobileMenu()
