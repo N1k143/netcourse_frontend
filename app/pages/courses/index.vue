@@ -1,3 +1,4 @@
+<!-- pages/courses.vue -->
 <template>
   <main class="min-h-screen bg-slate-950 pt-32 pb-20 px-6">
     <div class="absolute inset-0 opacity-30 pointer-events-none">
@@ -110,17 +111,13 @@
             :key="course.id"
             class="group relative bg-slate-900 border border-emerald-500/20 rounded-xl p-5 hover:border-emerald-500 hover:bg-slate-900/90 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/20 flex flex-col"
           >
-
             <div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-emerald-500/50 rounded-tr-xl group-hover:border-emerald-500 transition-all duration-300"></div>
-
             <div class="flex items-start justify-between mb-4">
               <component :is="getIconComponent(course.category)" :class="['w-8 h-8', getIconColor(course.category)]" />
             </div>
-
             <h3 class="text-lg font-bold text-white mb-2 font-mono group-hover:text-emerald-400 transition-colors duration-300">
               {{ course.title }}
             </h3>
-
             <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-grow line-clamp-3">
               {{ course.description }}
             </p>
@@ -134,34 +131,27 @@
                     course.progress === 'in_progress' ? 'bg-emerald-500 animate-pulse' :
                     'bg-slate-600'
                   ]"></div>
-
                   <span :class="[
                     'text-xs font-mono font-bold',
                     course.progress === 'completed' ? 'text-green-500' :
                     course.progress === 'in_progress' ? 'text-emerald-400' :
                     'text-slate-400'
                   ]">
-                    {{ course.progress === 'completed' ? 'COMPLETED' :
-                       course.progress === 'in_progress' ? 'IN PROGRESS' :
-                       'NOT STARTED' }}
+                    {{ course.progress === 'completed' ? 'COMPLETED' : course.progress === 'in_progress' ? 'IN PROGRESS' : 'NOT STARTED' }}
                   </span>
                 </div>
               </div>
-
               <div class="w-full bg-slate-800 rounded-full h-1 overflow-hidden">
                 <div 
                   :class="[
                     'h-1 rounded-full transition-all duration-1000 ease-out group-hover:animate-pulse',
-                    course.progress === 'completed'
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                      : course.progress === 'in_progress'
-                      ? 'bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500'
-                      : 'bg-gradient-to-r from-slate-600 to-slate-500'
+                    course.progress === 'completed' ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                    course.progress === 'in_progress' ? 'bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500' :
+                    'bg-gradient-to-r from-slate-600 to-slate-500'
                   ]"
                   :style="{ width: `${mapProgressValue(course.progress)}%` }"
                 ></div>
               </div>
-
               <div class="flex justify-between text-[10px] text-slate-600 font-mono mt-1">
                 <span>NOT STARTED</span>
                 <span>IN PROGRESS</span>
@@ -251,7 +241,6 @@
         </div>
       </div>
     </div>
-
     <ToastContainer :toasts="toasts" @remove="removeToast" />
   </main>
 </template>
@@ -260,6 +249,7 @@
 import { Network, ShieldCheck, Code2 } from 'lucide-vue-next'
 
 const router = useRouter()
+const route = useRoute()
 const { toasts, success, error: showError, removeToast } = useToast()
 const { coursesAPI, enrollmentsAPI, userAPI, progressAPI, handleApiError } = useApi()
 const { user, isAuthenticated, initialize } = useAuth()
@@ -327,23 +317,18 @@ const loadCoursesWithEnrollment = async () => {
   error.value = ''
   
   try {
-    // Загружаем все курсы с сервера
     const allCourses = await coursesAPI.getAll()
-
     let userEnrolledIds = []
     let coursesWithProgress = []
 
     if (isAuthenticated.value && user.value) {
       try {
-        // Загружаем данные пользователя с enrollments
         const userData = await userAPI.getById(user.value.id)
         userEnrolledIds = userData.enrollments?.map(e => e.courseId) || []
         enrolledCourseIds.value = userEnrolledIds
 
-        // Загружаем прогресс для каждого курса
         const coursesWithProgressPromises = allCourses.map(async (course) => {
           const isEnrolled = userEnrolledIds.includes(course.id)
-          
           if (isEnrolled) {
             try {
               const progressData = await progressAPI.getByCourse(course.id)
@@ -355,44 +340,22 @@ const loadCoursesWithEnrollment = async () => {
                                    progressData.status === 'in_progress' ? 50 : 0
               }
             } catch (err) {
-              return {
-                ...course,
-                isEnrolled: true,
-                progress: 'not_started',
-                progressPercentage: 0
-              }
+              return { ...course, isEnrolled: true, progress: 'not_started', progressPercentage: 0 }
             }
           } else {
-            return {
-              ...course,
-              isEnrolled: false,
-              progress: 'not_started',
-              progressPercentage: 0
-            }
+            return { ...course, isEnrolled: false, progress: 'not_started', progressPercentage: 0 }
           }
         })
-
         coursesWithProgress = await Promise.all(coursesWithProgressPromises)
       } catch (err) {
         console.error('Ошибка загрузки данных пользователя:', err)
-        coursesWithProgress = allCourses.map(course => ({
-          ...course,
-          isEnrolled: false,
-          progress: 'not_started',
-          progressPercentage: 0
-        }))
+        coursesWithProgress = allCourses.map(course => ({ ...course, isEnrolled: false, progress: 'not_started', progressPercentage: 0 }))
       }
     } else {
-      coursesWithProgress = allCourses.map(course => ({
-        ...course,
-        isEnrolled: false,
-        progress: 'not_started',
-        progressPercentage: 0
-      }))
+      coursesWithProgress = allCourses.map(course => ({ ...course, isEnrolled: false, progress: 'not_started', progressPercentage: 0 }))
     }
 
-    // Форматируем курсы
-    const formattedCourses = coursesWithProgress.map(course => ({
+    courses.value = coursesWithProgress.map(course => ({
       id: course.id || course._id,
       title: course.title || 'Без названия',
       description: course.description || 'Описание отсутствует',
@@ -401,13 +364,9 @@ const loadCoursesWithEnrollment = async () => {
       isEnrolled: course.isEnrolled,
       category: course.category || 'other'
     }))
-    
-    courses.value = formattedCourses
-
   } catch (err) {
     console.error('Error loading courses:', err)
-    const errorMessage = handleApiError(err, 'Не удалось загрузить курсы. Попробуйте позже.')
-    error.value = errorMessage
+    error.value = handleApiError(err, 'Не удалось загрузить курсы. Попробуйте позже.')
   } finally {
     loading.value = false
   }
@@ -418,9 +377,7 @@ const handleEnroll = async (courseId) => {
     showError('Пожалуйста, войдите в систему, чтобы записаться на курс.')
     return
   }
-
   enrollingCourseId.value = courseId
-
   try {
     await enrollmentsAPI.enroll(courseId, user.value.id)
     success('Вы успешно записаны на курс!')
@@ -436,13 +393,9 @@ const handleCourseAction = async (course) => {
   if (!course.isEnrolled) {
     await handleEnroll(course.id)
   } else {
-    // Если курс не начат, обновляем статус на in_progress
     if (course.progress === 'not_started') {
       try {
-        await progressAPI.update(course.id, {
-          status: 'in_progress',
-          completedLessons: []
-        })
+        await progressAPI.update(course.id, { status: 'in_progress', completedLessons: [] })
         await loadCoursesWithEnrollment()
       } catch (err) {
         console.error('Ошибка обновления прогресса:', err)
@@ -455,5 +408,11 @@ const handleCourseAction = async (course) => {
 onMounted(() => {
   initialize()
   loadCoursesWithEnrollment()
+
+  // Активируем фильтр, если передан параметр ?category=
+  const queryCategory = route.query.category
+  if (queryCategory && ['programming', 'networking', 'cybersecurity'].includes(queryCategory)) {
+    filter.value = queryCategory
+  }
 })
 </script>

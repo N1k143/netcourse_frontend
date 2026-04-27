@@ -61,7 +61,7 @@
         @close="closeInterestModal"
       />
       <template #fallback>
-        <!-- пусто, чтобы не нарушать вёрстку -->
+        <!-- пусто -->
       </template>
     </ClientOnly>
   </main>

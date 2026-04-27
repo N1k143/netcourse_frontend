@@ -59,7 +59,7 @@
                 <div class="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
 
-              <!-- Карточки категорий (появляются только после загрузки) -->
+              <!-- Карточки категорий -->
               <div v-else class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <button
                   v-for="cat in categories"
