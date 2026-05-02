@@ -22,7 +22,7 @@
               class="w-10 h-10 bg-slate-700 hover:bg-emerald-500 rounded-full flex items-center justify-center transition-colors"
             >
               <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/1200px-Instagram_logo_2022.svg.png" 
+                src="https://th.bing.com/th/id/R.26d9974a1feec9905a4e0d5e5ddf8db6?rik=Og1ujXM2C1AJHQ&riu=http%3a%2f%2fupload.wikimedia.org%2fwikipedia%2fcommons%2fa%2fa5%2fInstagram_icon.png&ehk=1%2fZWXYn2nN%2fR80TOtcKH5SsdLkkUvMLrB%2fHUXRDHk9I%3d&risl=&pid=ImgRaw&r=0" 
                 class="w-5 h-5"
                 alt="Instagram"
               />
@@ -121,7 +121,7 @@
       <!-- Нижняя часть -->
       <div class="mt-12 pt-8 border-t border-slate-700 flex flex-col md:flex-row justify-between items-center">
         <p class="text-slate-400 text-sm font-mono">
-          © 2026 NetCourse | Status: <span class="text-emerald-500">Online</span>
+          © 2026 NetCourse <span class="text-emerald-500">// powered by EVC </span>
         </p>
         <div class="flex space-x-6 mt-4 md:mt-0">
           <NuxtLink to="/privacypolicy" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm font-mono">

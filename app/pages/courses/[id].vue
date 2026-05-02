@@ -5,7 +5,6 @@
     </div>
     <div class="absolute inset-0 pointer-events-none overflow-hidden bg-[linear-gradient(to_right,#10b98120_1px,transparent_1px),linear-gradient(to_bottom,#10b98120_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
 
-    <!-- Модальное окно завершения курса (обновлённое) -->
     <CourseCompletionModal
       :show="showCompletionModal"
       :courseTitle="course?.title || ''"
@@ -33,46 +32,45 @@
             <span class="text-emerald-400">{{ course?.title || 'Курс' }}</span>
           </div>
 
-          <h1 class="text-3xl lg:text-5xl font-bold text-white mb-2 break-words">
-            <span class="text-emerald-500 font-mono">$ less </span>
-            <span class="font-sans bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
-              {{ course?.title }}
-            </span>
-          </h1>
-          <p class="text-slate-400 font-mono text-sm max-w-3xl break-words">{{ course?.description }}</p>
+          <div class="flex flex-wrap justify-between items-start gap-4">
+            <div class="flex-1">
+              <h1 class="text-3xl lg:text-5xl font-bold text-white mb-2 break-words">
+                <span class="text-emerald-500 font-mono">$ less </span>
+                <span class="font-sans bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+                  {{ course?.title }}
+                </span>
+              </h1>
+              <p class="text-slate-400 font-mono text-sm max-w-3xl break-words">{{ course?.description }}</p>
+            </div>
 
-          <!-- Статус прогресса + кнопка сертификат -->
-          <div v-if="courseProgress" class="mt-4 flex items-center gap-3 flex-wrap">
-            <span :class="[
-              'px-2 py-1 rounded text-xs font-mono border',
-              courseProgress.status === 'completed'
-                ? 'bg-green-500/20 text-green-500 border-green-500/30'
-                : courseProgress.status === 'in_progress'
-                ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30'
-                : 'bg-slate-500/20 text-slate-500 border-slate-500/30'
-            ]">
-              {{ courseProgress.status === 'completed' ? 'КУРС ЗАВЕРШЕН' :
-                 courseProgress.status === 'in_progress' ? 'В ПРОЦЕССЕ' : 'НЕ НАЧАТ' }}
-            </span>
+            <div class="flex items-center gap-3">
+              <div v-if="courseProgress" class="flex items-center gap-3 flex-wrap">
+                <span :class="[
+                  'px-2 py-1 rounded text-xs font-mono border',
+                  courseProgress.status === 'completed'
+                    ? 'bg-green-500/20 text-green-500 border-green-500/30'
+                    : courseProgress.status === 'in_progress'
+                    ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30'
+                    : 'bg-slate-500/20 text-slate-500 border-slate-500/30'
+                ]">
+                  {{ courseProgress.status === 'completed' ? 'КУРС ЗАВЕРШЕН' :
+                     courseProgress.status === 'in_progress' ? 'В ПРОЦЕССЕ' : 'НЕ НАЧАТ' }}
+                </span>
 
-            <!-- Кнопка открыть сертификат повторно -->
-            <button
-              v-if="courseProgress.status === 'completed'"
-              @click="showCompletionModal = true"
-              class="flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 hover:border-yellow-500/50 text-yellow-400 hover:text-yellow-300 rounded-lg font-mono text-xs transition-all"
-            >
-              <Icon name="mdi:certificate-outline" class="w-3.5 h-3.5" />
-              <span>Мой сертификат</span>
-            </button>
+                <button
+                  v-if="courseProgress.status === 'completed'"
+                  @click="showCompletionModal = true"
+                  class="flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 hover:border-yellow-500/50 text-yellow-400 hover:text-yellow-300 rounded-lg font-mono text-xs transition-all"
+                >
+                  <Icon name="mdi:certificate-outline" class="w-3.5 h-3.5" />
+                  <span>Мой сертификат</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div v-if="error" class="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-          <div class="text-yellow-400 font-mono text-sm">{{ error }}</div>
-        </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8 items-start">
-
           <div class="lg:col-span-1 sticky top-24 self-start">
             <CourseNavigation
               v-if="sections.length > 0"
@@ -91,7 +89,7 @@
               :courseId="courseId"
               :sectionId="currentSectionId"
               :lessonId="currentLesson.id"
-              @complete="handleMarkComplete"
+              @complete="handleQuizComplete"
               @close="handleCloseQuiz"
             />
 
@@ -100,10 +98,12 @@
               :courseId="courseId"
               :currentSectionId="currentSectionId"
               :currentLesson="currentLesson"
-              :courseCompleted="courseProgress?.status === 'completed'"  
-              @mark-complete="handleMarkComplete"
+              :lessonCompleted="isLessonCompleted(currentLesson.id)"
+              :courseCompleted="isCourseCompleted"
               @navigate="handleNavigate"
               @open-test="handleOpenTest"
+              @mark-complete="handleAutoMarkComplete"
+              @complete-course="handleManualComplete"
             />
 
             <div v-else class="bg-slate-900 border border-slate-700 rounded-xl p-8 text-center">
@@ -118,13 +118,19 @@
         </div>
       </template>
     </div>
+
+    <!-- Toast Container -->
+    <ToastContainer :toasts="toasts" @remove="removeToast" />
   </main>
 </template>
 
 <script setup>
+import { useToast } from '~/composables/useToast'  // путь может отличаться, обычно ~/composables/useToast
+
 const route = useRoute()
 const router = useRouter()
-const { coursesAPI, sectionsAPI, lessonsAPI, progressAPI, certificationsAPI, authAPI, badgesAPI } = useApi()  // добавлен badgesAPI
+const { coursesAPI, sectionsAPI, lessonsAPI, progressAPI, certificationsAPI, authAPI, badgesAPI } = useApi()
+const { toasts, success, error: showError, removeToast } = useToast()
 
 const courseId = computed(() => route.params.id)
 
@@ -135,11 +141,30 @@ const currentSectionId = ref(null)
 const currentLesson = ref(null)
 const courseProgress = ref(null)
 const courseCertification = ref(null)
-const courseMedal = ref(null)               // новая переменная для медали
+const courseMedal = ref(null)
 const loading = ref(true)
 const error = ref('')
 const showQuizView = ref(false)
 const showCompletionModal = ref(false)
+
+const isCourseCompleted = computed(() => courseProgress.value?.status === 'completed')
+const allLessonsList = computed(() => {
+  const lessons = []
+  for (const section of sections.value) {
+    const sectionLessons = lessonsBySection.value[section.id] || []
+    lessons.push(...sectionLessons.map(l => ({ ...l, sectionId: section.id })))
+  }
+  return lessons
+})
+const currentLessonIndex = computed(() => {
+  if (!currentLesson.value) return -1
+  return allLessonsList.value.findIndex(l => l.id === currentLesson.value.id)
+})
+
+const isLessonCompleted = (lessonId) => {
+  if (!lessonId || !courseProgress.value?.completedLessons) return false
+  return courseProgress.value.completedLessons.includes(lessonId)
+}
 
 const loadCourseCertification = async () => {
   try {
@@ -167,34 +192,31 @@ const loadCourseData = async () => {
       description: courseData.description || 'Описание отсутствует'
     }
 
-    // Загружаем прогресс пользователя
     const currentUser = authAPI.getCurrentUser()
     if (currentUser) {
       try {
         const progressData = await progressAPI.getByCourse(courseId.value)
         courseProgress.value = progressData
       } catch (err) {
-        console.log('Прогресс курса не найден, создадим новый')
-        courseProgress.value = null
+        console.log('Прогресс курса не найден')
+        courseProgress.value = { status: 'not_started', completedLessons: [] }
       }
 
-      // Загружаем сертификат если курс завершён
-      if (courseProgress.value?.status === 'completed') {
+      if (isCourseCompleted.value) {
         await loadCourseCertification()
-        // также загружаем медаль, если она есть (можно сразу получить)
         try {
           courseMedal.value = await badgesAPI.getBadgeForCourse(courseId.value)
         } catch {
           courseMedal.value = null
         }
       }
+    } else {
+      courseProgress.value = { status: 'not_started', completedLessons: [] }
     }
 
-    // Загружаем разделы курса
     const sectionsData = await sectionsAPI.getByCourse(courseId.value)
     sections.value = sectionsData.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))
 
-    // Загружаем уроки для каждого раздела
     const lessonsMap = {}
     for (const section of sections.value) {
       try {
@@ -207,7 +229,6 @@ const loadCourseData = async () => {
     }
     lessonsBySection.value = lessonsMap
 
-    // Устанавливаем первый урок как текущий
     if (sections.value.length > 0) {
       const firstSection = sections.value[0]
       const firstSectionLessons = lessonsMap[firstSection.id]
@@ -216,7 +237,6 @@ const loadCourseData = async () => {
         currentLesson.value = firstSectionLessons[0]
       }
     }
-
   } catch (err) {
     console.error('Error loading course:', err)
     error.value = 'Не удалось загрузить данные курса'
@@ -228,67 +248,43 @@ const loadCourseData = async () => {
 const handleLessonSelect = async (sectionId, lessonId) => {
   const lesson = lessonsBySection.value[sectionId]?.find(l => l.id === lessonId)
   if (!lesson) return
-
   currentSectionId.value = sectionId
   currentLesson.value = lesson
   showQuizView.value = false
+  if (process.client) window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
-  if (process.client) {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+const handleAutoMarkComplete = async () => {
+  if (!currentLesson.value) return
+  try {
+    const completedSet = new Set(courseProgress.value?.completedLessons || [])
+    if (!completedSet.has(currentLesson.value.id)) {
+      completedSet.add(currentLesson.value.id)
+      const updated = await progressAPI.update(courseId.value, { completedLessons: Array.from(completedSet) })
+      courseProgress.value = { ...courseProgress.value, ...updated }
+    }
+  } catch {
+    // молча игнорируем
   }
 }
 
 const getNextLesson = () => {
-  if (!currentLesson.value || !currentSectionId.value) return null
-
-  const currentLessons = lessonsBySection.value[currentSectionId.value] || []
-  const currentIndex = currentLessons.findIndex(l => l.id === currentLesson.value.id)
-
-  if (currentIndex < currentLessons.length - 1) {
-    return {
-      lesson: currentLessons[currentIndex + 1],
-      sectionId: currentSectionId.value
-    }
+  if (!currentLesson.value) return null
+  const idx = currentLessonIndex.value
+  if (idx >= 0 && idx < allLessonsList.value.length - 1) {
+    const next = allLessonsList.value[idx + 1]
+    return { lesson: next, sectionId: next.sectionId }
   }
-
-  const sectionIndex = sections.value.findIndex(s => s.id === currentSectionId.value)
-  for (let i = sectionIndex + 1; i < sections.value.length; i++) {
-    const nextLessons = lessonsBySection.value[sections.value[i].id] || []
-    if (nextLessons.length) {
-      return {
-        lesson: nextLessons[0],
-        sectionId: sections.value[i].id
-      }
-    }
-  }
-
   return null
 }
 
 const getPrevLesson = () => {
-  if (!currentLesson.value || !currentSectionId.value) return null
-
-  const currentLessons = lessonsBySection.value[currentSectionId.value] || []
-  const currentIndex = currentLessons.findIndex(l => l.id === currentLesson.value.id)
-
-  if (currentIndex > 0) {
-    return {
-      lesson: currentLessons[currentIndex - 1],
-      sectionId: currentSectionId.value
-    }
+  if (!currentLesson.value) return null
+  const idx = currentLessonIndex.value
+  if (idx > 0) {
+    const prev = allLessonsList.value[idx - 1]
+    return { lesson: prev, sectionId: prev.sectionId }
   }
-
-  const sectionIndex = sections.value.findIndex(s => s.id === currentSectionId.value)
-  if (sectionIndex > 0) {
-    const prevLessons = lessonsBySection.value[sections.value[sectionIndex - 1].id] || []
-    if (prevLessons.length) {
-      return {
-        lesson: prevLessons[prevLessons.length - 1],
-        sectionId: sections.value[sectionIndex - 1].id
-      }
-    }
-  }
-
   return null
 }
 
@@ -296,74 +292,75 @@ const handleEquipMedal = (medal) => {
   if (!medal) return
   const EQUIP_KEY = 'equippedBadge'
   const current = JSON.parse(localStorage.getItem(EQUIP_KEY) || 'null')
-  if (current?.id === medal.id) {
-    localStorage.removeItem(EQUIP_KEY)
-  } else {
-    localStorage.setItem(EQUIP_KEY, JSON.stringify(medal))
-  }
+  if (current?.id === medal.id) localStorage.removeItem(EQUIP_KEY)
+  else localStorage.setItem(EQUIP_KEY, JSON.stringify(medal))
   window.dispatchEvent(new Event('badge-equipped'))
 }
 
-const handleMarkComplete = async (testResults = null) => {
-  if (!courseId.value || !currentSectionId.value || !currentLesson.value) return
-
+const completeCourse = async () => {
+  error.value = ''
   try {
-    const progressData = {
-      status: 'completed',
-      updatedAt: new Date().toISOString(),
-      ...(testResults && { testResults })
-    }
-
-    await progressAPI.update(courseId.value, progressData)
-
-    courseProgress.value = {
-      ...courseProgress.value,
-      ...progressData
-    }
-
-    // Подгружаем сертификат
+    const updated = await progressAPI.update(courseId.value, { status: 'completed' })
+    courseProgress.value = { ...courseProgress.value, ...updated, status: 'completed' }
     await loadCourseCertification()
-
-    // Загружаем медаль за курс (предполагается наличие метода)
     try {
       courseMedal.value = await badgesAPI.getBadgeForCourse(courseId.value)
     } catch {
       courseMedal.value = null
     }
-
-    // Открываем модалку
     showCompletionModal.value = true
-
-    const nextLessonData = getNextLesson()
-    if (nextLessonData) {
-      await handleLessonSelect(nextLessonData.sectionId, nextLessonData.lesson.id)
-    }
-
+    success('Курс успешно завершён! 🎉')
+    return true
   } catch (err) {
-    console.error('Error marking lesson as complete:', err)
-    error.value = 'Не удалось отметить урок как завершенный'
+    console.error('Error completing course:', err)
+    const data = err?.data
+    if (data?.missingQuizIds?.length) {
+      showError(`Сначала пройдите все тесты (мин. балл ${data.minScore}%). Не пройдены: тесты #${data.missingQuizIds.join(', #')}`)
+    } else {
+      showError(err?.message || 'Не удалось завершить курс')
+    }
+    return false
+  }
+}
+
+const handleManualComplete = () => {
+  completeCourse()
+}
+
+const handleQuizComplete = async () => {
+  showQuizView.value = false
+  try {
+    const completedSet = new Set(courseProgress.value?.completedLessons || [])
+    if (currentLesson.value && !completedSet.has(currentLesson.value.id)) {
+      completedSet.add(currentLesson.value.id)
+      const updated = await progressAPI.update(courseId.value, { completedLessons: Array.from(completedSet) })
+      courseProgress.value = { ...courseProgress.value, ...updated }
+    }
+  } catch (err) {
+    showError('Не удалось обновить прогресс')
+  }
+
+  const next = getNextLesson()
+  if (next) {
+    await handleLessonSelect(next.sectionId, next.lesson.id)
+  } else {
+    success('Поздравляем! Все уроки пройдены. Нажмите «Завершить курс» для получения наград.')
   }
 }
 
 const handleNavigate = (direction) => {
   if (direction === 'next') {
-    const nextLessonData = getNextLesson()
-    if (nextLessonData) {
-      handleLessonSelect(nextLessonData.sectionId, nextLessonData.lesson.id)
-    }
+    const next = getNextLesson()
+    if (next) handleLessonSelect(next.sectionId, next.lesson.id)
   } else if (direction === 'prev') {
-    const prevLessonData = getPrevLesson()
-    if (prevLessonData) {
-      handleLessonSelect(prevLessonData.sectionId, prevLessonData.lesson.id)
-    }
+    const prev = getPrevLesson()
+    if (prev) handleLessonSelect(prev.sectionId, prev.lesson.id)
   }
 }
 
 const handleOpenTest = () => {
   showQuizView.value = true
-  if (process.client) {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  if (process.client) window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 const handleCloseQuiz = () => {

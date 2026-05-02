@@ -16,7 +16,6 @@ export const useApi = () => {
       ...options,
     }
 
-    // Добавляем токен авторизации если есть
     if (process.client) {
       const token = localStorage.getItem('authToken')
       if (token) {
@@ -24,7 +23,6 @@ export const useApi = () => {
       }
     }
 
-    // Преобразуем body в JSON если это объект
     if (requestConfig.body && typeof requestConfig.body === 'object') {
       requestConfig.body = JSON.stringify(requestConfig.body)
     }
@@ -34,7 +32,6 @@ export const useApi = () => {
 
       const contentType = response.headers.get('content-type')
 
-      // Обработка пустых ответов (204 No Content)
       if (response.status === 204 || !contentType || !contentType.includes('application/json')) {
         if (response.ok) {
           return { success: true }
@@ -44,7 +41,6 @@ export const useApi = () => {
         }
       }
 
-      // Парсим JSON ответ
       let data
       try {
         data = await response.json()
@@ -55,23 +51,31 @@ export const useApi = () => {
         throw new Error(`Invalid JSON response from server: ${response.status} ${response.statusText}`)
       }
 
-      // Проверяем статус ответа
       if (!response.ok) {
         const errorMessage = data.message || data.error || `HTTP Error: ${response.status}`
-        throw new Error(errorMessage)
+        // ИСПРАВЛЕНИЕ: прокидываем весь объект data вместе с ошибкой,
+        // чтобы можно было читать err.data.missingQuizIds и т.д.
+        const err: any = new Error(errorMessage)
+        err.data = data
+        err.status = response.status
+        throw err
       }
 
       return data
 
     } catch (error: any) {
+      // Если ошибка уже содержит data (выброшена выше) — пробрасываем как есть
+      if (error.data !== undefined) {
+        throw error
+      }
+
       let userMessage = error.message
 
-      // Пользовательские сообщения для типовых ошибок
-      if (error.message.includes('Failed to fetch') || 
+      if (error.message.includes('Failed to fetch') ||
           error.message.includes('NetworkError') ||
           error.message.includes('Network Error')) {
         userMessage = 'Не удалось подключиться к серверу. Проверьте интернет-соединение.'
-      } 
+      }
       else if (error.message.includes('timeout')) {
         userMessage = 'Сервер не отвечает. Попробуйте позже.'
       }
@@ -184,74 +188,68 @@ export const useApi = () => {
     getByCourse: (courseId: string | number) => apiRequest(`/courses/${courseId}/progress`),
     update: (courseId: string | number, progressData: any) => apiRequest(`/courses/${courseId}/progress`, {
       method: 'PUT',
-      body: progressData 
+      body: progressData
     })
   }
 
   // ============ ВИКТОРИНЫ ============
   const quizzesAPI = {
-    getByLesson: (courseId: string | number, sectionId: string | number, lessonId: string | number) => 
+    getByLesson: (courseId: string | number, sectionId: string | number, lessonId: string | number) =>
         apiRequest(`/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}/quizzes`),
 
-    getById: (courseId: string | number, sectionId: string | number, lessonId: string | number, quizId: string | number) => 
+    getById: (courseId: string | number, sectionId: string | number, lessonId: string | number, quizId: string | number) =>
         apiRequest(`/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}/quizzes/${quizId}`),
 
-    getQuestions: (courseId: string | number, sectionId: string | number, lessonId: string | number, quizId: string | number) => 
+    getQuestions: (courseId: string | number, sectionId: string | number, lessonId: string | number, quizId: string | number) =>
         apiRequest(`/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}/quizzes/${quizId}/questions`),
 
-    getAnswers: (courseId: string | number, sectionId: string | number, lessonId: string | number, quizId: string | number, questionId: string | number) => 
+    getAnswers: (courseId: string | number, sectionId: string | number, lessonId: string | number, quizId: string | number, questionId: string | number) =>
         apiRequest(`/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}/quizzes/${quizId}/questions/${questionId}/answers`),
 
-    submitResults: (courseId: string | number, sectionId: string | number, lessonId: string | number, quizId: string | number, results: any) => 
-        apiRequest(`/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}/quizzes/${quizId}/submit`, {
+    submitAttempt: (courseId: string | number, sectionId: string | number, lessonId: string | number, quizId: string | number, body: { answers: { questionId: number; answerIds: number[] }[] }) =>
+        apiRequest(`/courses/${courseId}/sections/${sectionId}/lessons/${lessonId}/quizzes/${quizId}/attempts`, {
             method: 'POST',
-            body: results
+            body
         })
   }
 
   // ============ ЗНАЧКИ (BADGES) ============
   const badgesAPI = {
-    // Получить все значки
     getAll: () => apiRequest('/badges'),
 
-    // Получить значки текущего пользователя
     getMyBadges: () => apiRequest('/badges/me'),
 
-    // Получить значки конкретного пользователя (admin)
     getUserBadges: (userId: string | number) => apiRequest(`/admin/badges/users/${userId}`),
+
+    getBadgeForCourse: async (courseId: string | number) => {
+      const badges: any[] = await apiRequest('/badges/me')
+      return badges.find((b: any) => String(b.badge?.courseId) === String(courseId)) || null
+    }
   }
 
   // ============ СЕРТИФИКАТЫ (CERTIFICATIONS) ============
   const certificationsAPI = {
-    // Получить сертификаты текущего пользователя
     getMyCertifications: () => apiRequest('/certifications/me'),
 
-    // Верифицировать сертификат по коду
     verify: (code: string) => apiRequest(`/certifications/verify/${code}`),
 
-    // Получить сертификаты конкретного пользователя (admin)
     getUserCertifications: (userId: string | number) => apiRequest(`/admin/certifications/users/${userId}`),
   }
 
   // ============ СОЦИАЛЬНЫЕ ССЫЛКИ (SOCIAL LINKS) ============
   const socialLinksAPI = {
-    // Получить все ссылки текущего пользователя
     getAll: () => apiRequest('/social-links'),
 
-    // Создать новую ссылку
-    // platform: "github" | "twitter" | "youtube" | "website" | "other"
     create: (data: { platform: string; url: string }) => apiRequest('/social-links', {
       method: 'POST',
       body: data
     }),
 
-    // Обновить ссылку
     update: (id: string | number, data: { platform?: string; url?: string }) => apiRequest(`/social-links/${id}`, {
       method: 'PUT',
       body: data
     }),
 
-    // Удалить ссылку
     delete: (id: string | number) => apiRequest(`/social-links/${id}`, {
       method: 'DELETE'
     })
@@ -302,7 +300,7 @@ export const useApi = () => {
 
       if (typeof value === 'string') {
         value = value.trim()
-        
+
         if (key === 'email' && !value.includes('@')) {
           throw new Error('Некорректный email адрес')
         }

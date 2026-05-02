@@ -122,6 +122,36 @@
               {{ course.description }}
             </p>
 
+            <!-- Рейтинг курса -->
+            <div v-if="course.averageRating !== null" class="flex items-center gap-1.5 mb-3">
+              <div class="flex items-center gap-0.5">
+                <template v-for="i in 5" :key="i">
+                  <svg
+                    class="w-3.5 h-3.5"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8 1l1.85 3.75L14 5.5l-3 2.92.7 4.08L8 10.4l-3.7 2.1.7-4.08L2 5.5l4.15-.75L8 1z"
+                      :fill="i <= Math.round(course.averageRating) ? '#f59e0b' : 'transparent'"
+                      :stroke="i <= Math.round(course.averageRating) ? '#f59e0b' : '#64748b'"
+                      stroke-width="1"
+                    />
+                  </svg>
+                </template>
+              </div>
+              <span class="text-amber-400 font-mono text-xs font-bold">
+                {{ course.averageRating.toFixed(1) }}
+              </span>
+              <span class="text-slate-500 font-mono text-xs">
+                ({{ course.ratingsCount }})
+              </span>
+            </div>
+            <div v-else class="mb-3">
+              <span class="text-slate-600 font-mono text-xs">// нет оценок</span>
+            </div>
+
             <div v-if="course.isEnrolled" class="mb-4">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
@@ -362,7 +392,9 @@ const loadCoursesWithEnrollment = async () => {
       progress: course.progress,
       progressPercentage: course.progressPercentage,
       isEnrolled: course.isEnrolled,
-      category: course.category || 'other'
+      category: course.category || 'other',
+      averageRating: course.averageRating ?? null,
+      ratingsCount: course.ratingsCount ?? 0,
     }))
   } catch (err) {
     console.error('Error loading courses:', err)
@@ -409,7 +441,6 @@ onMounted(() => {
   initialize()
   loadCoursesWithEnrollment()
 
-  // Активируем фильтр, если передан параметр ?category=
   const queryCategory = route.query.category
   if (queryCategory && ['programming', 'networking', 'cybersecurity'].includes(queryCategory)) {
     filter.value = queryCategory

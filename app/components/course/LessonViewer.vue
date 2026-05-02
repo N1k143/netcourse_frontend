@@ -19,15 +19,12 @@
 
     <!-- Content Area -->
     <div class="markdown-content min-h-[250px] xs:min-h-[300px] sm:min-h-[350px] md:min-h-[400px] mb-4 xs:mb-5 sm:mb-6 w-full overflow-hidden">
-      <!-- Text Content -->
       <div v-if="currentLesson.contentType === 'text' && currentLesson.textContent" class="w-full overflow-hidden">
         <MarkdownRenderer :content="currentLesson.textContent" />
       </div>
 
-      <!-- Video Content -->
       <div v-else-if="currentLesson.contentType === 'video' && currentLesson.videoUrl" class="w-full">
         <div class="aspect-video bg-black rounded-lg overflow-hidden w-full">
-          <!-- YouTube -->
           <iframe
             v-if="getYouTubeVideoId(currentLesson.videoUrl)"
             :src="`https://www.youtube.com/embed/${getYouTubeVideoId(currentLesson.videoUrl)}`"
@@ -37,7 +34,6 @@
             allowfullscreen
             title="YouTube видео урока"
           />
-          <!-- Regular Video -->
           <video
             v-else
             :src="currentLesson.videoUrl"
@@ -50,7 +46,6 @@
         </div>
       </div>
 
-      <!-- No Content -->
       <div v-else class="text-center py-6 xs:py-8 sm:py-10 md:py-12 lg:py-20">
         <div class="text-slate-400 font-mono text-xs xs:text-sm sm:text-base md:text-lg mb-2 xs:mb-3 sm:mb-4">
           // Контент урока не найден
@@ -80,7 +75,6 @@
 
     <!-- Navigation Buttons -->
     <div class="flex flex-col sm:flex-row justify-between gap-2 xs:gap-2.5 sm:gap-3 mt-4 xs:mt-5 sm:mt-6 md:mt-8 pt-4 xs:pt-5 sm:pt-6 border-t border-emerald-500/20">
-      <!-- Previous Button -->
       <button
         @click="emit('navigate', 'prev')"
         class="px-3 py-2 xs:px-4 xs:py-2.5 sm:px-5 sm:py-3 bg-slate-800 text-slate-300 rounded-lg font-mono text-xs xs:text-sm hover:bg-slate-700 transition-all border border-slate-600 hover:border-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group/btn"
@@ -92,30 +86,6 @@
         <div class="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-slate-700"></div>
       </button>
 
-      <!-- Complete Button — скрывается когда курс уже завершён -->
-      <button
-        v-if="!courseCompleted"
-        @click="handleMarkComplete"
-        :disabled="isMarkingComplete"
-        class="px-3 py-2 xs:px-4 xs:py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-slate-950 rounded-lg font-mono text-xs xs:text-sm hover:from-emerald-500 hover:to-emerald-400 transition-all hover:shadow-lg hover:shadow-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed order-first sm:order-none relative overflow-hidden group/btn"
-      >
-        <span class="relative z-10 flex items-center justify-center gap-1.5 xs:gap-2">
-          <div v-if="isMarkingComplete" class="w-3 h-3 xs:w-4 xs:h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
-          <template v-else>
-            <span class="w-1.5 h-1.5 xs:w-2 xs:h-2 bg-slate-950 rounded-full animate-pulse"></span>
-            > complete_lesson.sh
-          </template>
-        </span>
-        <div class="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-emerald-500 to-emerald-300"></div>
-      </button>
-
-      <!-- Плейсхолдер когда курс завершён — чтобы prev/next не съехали -->
-      <div v-else class="px-3 py-2 xs:px-4 xs:py-2.5 sm:px-5 sm:py-3 flex items-center justify-center gap-2 text-emerald-500 font-mono text-xs xs:text-sm order-first sm:order-none">
-        <Icon name="mdi:check-circle" class="w-4 h-4" />
-        <span>// курс завершён</span>
-      </div>
-
-      <!-- Next Button -->
       <button
         @click="emit('navigate', 'next')"
         class="px-3 py-2 xs:px-4 xs:py-2.5 sm:px-5 sm:py-3 bg-slate-800 text-slate-300 rounded-lg font-mono text-xs xs:text-sm hover:bg-slate-700 transition-all border border-slate-600 hover:border-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group/btn"
@@ -127,6 +97,29 @@
         <div class="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-slate-700"></div>
       </button>
     </div>
+
+    <!-- Кнопка «Завершить курс» всегда активна, пока курс не завершён -->
+    <div v-if="!courseCompleted" class="mt-4 xs:mt-5 sm:mt-6 pt-4 xs:pt-5 sm:pt-6 border-t border-emerald-500/20">
+      <button
+        @click="emit('complete-course')"
+        class="w-full px-3 py-2 xs:px-4 xs:py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-slate-950 rounded-lg font-mono text-xs xs:text-sm transition-all hover:shadow-lg hover:shadow-emerald-500/50 flex items-center justify-center gap-1.5 xs:gap-2 relative overflow-hidden group/btn"
+      >
+        <span class="relative z-10 flex items-center justify-center gap-1.5 xs:gap-2">
+          <Icon name="mdi:check-circle-outline" class="w-4 h-4" />
+          > complete_course.sh
+        </span>
+        <div class="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-emerald-500 to-emerald-300"></div>
+      </button>
+      <div class="text-center text-slate-500 text-[10px] xs:text-xs font-mono mt-1.5 xs:mt-2">
+        // Finish course and get rewards
+      </div>
+    </div>
+
+    <!-- Статус завершённого курса -->
+    <div v-else class="mt-4 xs:mt-5 sm:mt-6 pt-4 xs:pt-5 sm:pt-6 border-t border-emerald-500/20 text-center text-emerald-500 font-mono text-xs xs:text-sm flex items-center justify-center gap-2">
+      <Icon name="mdi:check-circle" class="w-4 h-4" />
+      <span>// курс завершён</span>
+    </div>
   </div>
 </template>
 
@@ -135,17 +128,16 @@ const props = defineProps({
   courseId:        { type: [String, Number], required: true },
   currentSectionId:{ type: [String, Number], default: null },
   currentLesson:   { type: Object,           default: () => ({}) },
-  // ← новый проп: скрывает кнопку "завершить" когда курс уже пройден
-  courseCompleted: { type: Boolean,           default: false }
+  lessonCompleted: { type: Boolean,          default: false },
+  courseCompleted: { type: Boolean,          default: false }
 })
 
-const emit = defineEmits(['mark-complete', 'navigate', 'open-test'])
+const emit = defineEmits(['navigate', 'open-test', 'mark-complete', 'complete-course'])
 
 const { quizzesAPI } = useApi()
-
-const isMarkingComplete = ref(false)
-const hasQuiz           = ref(false)
-const checkingQuiz      = ref(true)
+const hasQuiz = ref(false)
+const checkingQuiz = ref(true)
+const hasEmittedComplete = ref(false)
 
 const checkForQuiz = async () => {
   if (!props.courseId || !props.currentSectionId || !props.currentLesson?.id) {
@@ -161,16 +153,10 @@ const checkForQuiz = async () => {
     hasQuiz.value = false
   } finally {
     checkingQuiz.value = false
-  }
-}
-
-const handleMarkComplete = async () => {
-  if (!props.courseId || !props.currentSectionId || !props.currentLesson) return
-  isMarkingComplete.value = true
-  try {
-    await emit('mark-complete')
-  } finally {
-    isMarkingComplete.value = false
+    if (!hasQuiz.value && !props.lessonCompleted && !hasEmittedComplete.value) {
+      hasEmittedComplete.value = true
+      emit('mark-complete')
+    }
   }
 }
 
@@ -192,7 +178,10 @@ const getYouTubeVideoId = (url) => {
 
 watch(
   () => [props.courseId, props.currentSectionId, props.currentLesson],
-  () => checkForQuiz(),
+  () => {
+    hasEmittedComplete.value = false
+    checkForQuiz()
+  },
   { immediate: true }
 )
 </script>

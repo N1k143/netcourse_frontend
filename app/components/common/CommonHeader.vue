@@ -20,6 +20,9 @@
         <NuxtLink to="/courses" class="text-slate-400 hover:text-emerald-500 transition-colors font-mono text-sm">
           {{ '<Курсы/>' }}
         </NuxtLink>
+        <NuxtLink to="/forum" class="text-slate-400 hover:text-emerald-500 transition-colors font-mono text-sm">
+          {{ '<NetCourse/Forum/>' }}
+        </NuxtLink>
         <NuxtLink to="/about" class="text-slate-400 hover:text-emerald-500 transition-colors font-mono text-sm">
           {{ '<О нас/>' }}
         </NuxtLink>
@@ -150,6 +153,13 @@
             @click="closeMobileMenu"
           >
             {{ '<Курсы/>' }}
+          </NuxtLink>
+          <NuxtLink
+            to="/forum"
+            class="block text-slate-400 hover:text-emerald-500 transition-colors font-mono text-base sm:text-lg text-center py-2"
+            @click="closeMobileMenu"
+          >
+            {{ '<NetCourse/Forum/>' }}
           </NuxtLink>
           <NuxtLink
             to="/about"

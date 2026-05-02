@@ -6,200 +6,152 @@
         class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
         @click.self="$emit('close')"
       >
-        <!-- Backdrop -->
         <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md"></div>
 
-        <!-- Модальное окно -->
         <Transition name="modal-scale">
           <div
             v-if="show"
-            class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-900 border border-emerald-500/30 rounded-2xl shadow-2xl shadow-emerald-500/10"
+            class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl"
           >
-            <!-- Декоративная сетка фон -->
-            <div class="absolute inset-0 bg-[linear-gradient(to_right,#10b98110_1px,transparent_1px),linear-gradient(to_bottom,#10b98110_1px,transparent_1px)] bg-[size:24px_24px] rounded-2xl pointer-events-none"></div>
+            <!-- Верхний акцент -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-emerald-500/70 to-transparent"></div>
 
-            <!-- Верхнее свечение -->
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-emerald-500/60 to-transparent"></div>
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-16 bg-emerald-500/5 blur-2xl pointer-events-none rounded-full"></div>
-
-            <!-- Кнопка закрыть -->
+            <!-- Закрыть -->
             <button
               @click="$emit('close')"
-              class="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white transition-all"
+              class="absolute top-4 right-4 z-10 w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:border-slate-500 text-slate-500 hover:text-white transition-all"
             >
-              <Icon name="mdi:close" class="w-4 h-4" />
+              <Icon name="mdi:close" class="w-3.5 h-3.5" />
             </button>
 
-            <div class="relative p-5 sm:p-8">
-              <!-- Заголовок -->
-              <div class="text-center mb-6 sm:mb-8">
-                <!-- Иконка трофея -->
-                <div class="relative mx-auto mb-4 sm:mb-5 w-16 h-16 sm:w-20 sm:h-20">
-                  <div class="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl animate-pulse"></div>
-                  <div class="relative w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 border-emerald-500/50 rounded-full flex items-center justify-center">
-                    <Icon name="mdi:trophy-award" class="w-8 h-8 sm:w-10 sm:h-10 text-emerald-400" />
-                  </div>
-                  <!-- Орбитальные точки -->
-                  <div class="absolute inset-0 animate-spin-slow">
-                    <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  </div>
-                  <div class="absolute inset-0 animate-spin-slow" style="animation-delay: -2s;">
-                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 w-1.5 h-1.5 bg-cyan-400 rounded-full"></div>
+            <div class="p-6 sm:p-8">
+
+              <!-- Шапка -->
+              <div class="flex flex-col items-center text-center mb-8">
+                <div class="relative mb-5">
+                  <div class="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl"></div>
+                  <div class="relative w-16 h-16 bg-emerald-500/10 border border-emerald-500/40 rounded-full flex items-center justify-center">
+                    <Icon name="mdi:trophy-award" class="w-8 h-8 text-emerald-400" />
                   </div>
                 </div>
-
-                <div class="font-mono text-emerald-500 text-xs tracking-widest uppercase mb-2">// success</div>
-                <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
-                  Курс завершён!
-                </h2>
-                <p class="text-slate-400 font-mono text-xs sm:text-sm px-2">
-                  Вы успешно прошли курс
-                  <span class="text-emerald-400 font-semibold block sm:inline mt-1 sm:mt-0">{{ courseTitle }}</span>
+                <div class="text-emerald-500 font-mono text-[10px] tracking-[0.2em] uppercase mb-2">// course completed</div>
+                <h2 class="text-2xl font-bold text-white mb-1">Курс завершён!</h2>
+                <p class="text-slate-400 text-sm">
+                  Вы успешно прошли
+                  <span class="text-emerald-400 font-medium">{{ courseTitle }}</span>
                 </p>
               </div>
 
-              <!-- Разделитель: сертификат -->
-              <div class="flex items-center gap-3 mb-6">
-                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
-                <span class="text-slate-600 font-mono text-xs">certificate</span>
-                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
-              </div>
+              <!-- Сертификат -->
+              <div class="mb-4">
+                <div class="text-slate-600 font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <div class="flex-1 h-px bg-slate-800"></div>
+                  certificate
+                  <div class="flex-1 h-px bg-slate-800"></div>
+                </div>
 
-              <!-- Блок сертификата -->
-              <div v-if="certification" class="mb-6">
-                <div class="relative bg-slate-800/60 border border-yellow-500/30 rounded-xl p-4 sm:p-5 overflow-hidden">
-                  <!-- Декоративный угол -->
-                  <div class="absolute top-0 right-0 w-20 h-20 bg-yellow-500/5 blur-xl pointer-events-none"></div>
-                  <div class="absolute top-0 right-0 border-t-2 border-r-2 border-yellow-500/30 w-8 h-8 rounded-tr-xl pointer-events-none"></div>
-
-                  <div class="flex items-start gap-3 mb-4">
-                    <div class="w-9 h-9 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center justify-center shrink-0">
-                      <Icon name="mdi:certificate" class="w-5 h-5 text-yellow-400" />
+                <div v-if="certification" class="bg-slate-800/50 border border-yellow-500/20 rounded-xl p-4">
+                  <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-center justify-center shrink-0">
+                      <Icon name="mdi:certificate" class="w-4 h-4 text-yellow-400" />
                     </div>
-                    <div>
-                      <div class="text-yellow-400 font-mono text-xs font-bold tracking-wider uppercase mb-0.5">Сертификат выдан</div>
-                      <div class="text-white font-semibold text-sm sm:text-base break-words">{{ certification.course?.title || courseTitle }}</div>
+                    <div class="min-w-0">
+                      <div class="text-yellow-400 font-mono text-[10px] uppercase tracking-wider">Сертификат выдан</div>
+                      <div class="text-white text-sm font-medium truncate">{{ certification.course?.title || courseTitle }}</div>
                     </div>
                   </div>
 
-                  <!-- Инфо строки -->
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-                    <div class="bg-slate-900/60 rounded-lg p-3 border border-slate-700/50">
-                      <div class="text-slate-500 font-mono text-xs mb-1">Дата выдачи</div>
-                      <div class="text-slate-200 font-mono text-xs sm:text-sm font-semibold">{{ formatDate(certification.issuedAt) }}</div>
+                  <div class="grid grid-cols-2 gap-2 mb-4">
+                    <div class="bg-slate-900/60 rounded-lg p-2.5">
+                      <div class="text-slate-500 font-mono text-[10px] mb-0.5">Дата</div>
+                      <div class="text-slate-200 font-mono text-xs font-medium">{{ formatDate(certification.issuedAt) }}</div>
                     </div>
-                    <div class="bg-slate-900/60 rounded-lg p-3 border border-slate-700/50">
-                      <div class="text-slate-500 font-mono text-xs mb-1">Код</div>
-                      <div class="text-slate-200 font-mono text-xs sm:text-sm font-semibold break-all tracking-wider">
-                        {{ certification.certificateCode }}
-                      </div>
+                    <div class="bg-slate-900/60 rounded-lg p-2.5">
+                      <div class="text-slate-500 font-mono text-[10px] mb-0.5">Код</div>
+                      <div class="text-slate-200 font-mono text-xs font-medium truncate">{{ certification.certificateCode }}</div>
                     </div>
                   </div>
 
-                  <!-- Кнопка скачать -->
                   <button
                     @click="handleDownload"
                     :disabled="downloading"
-                    class="w-full flex items-center justify-center gap-2.5 py-3 px-5 rounded-xl font-mono font-bold text-sm transition-all duration-200 bg-gradient-to-r from-yellow-500 to-amber-400 hover:from-yellow-400 hover:to-amber-300 text-slate-900 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/30 disabled:opacity-60 disabled:cursor-not-allowed"
+                    class="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-mono text-sm font-bold transition-all bg-gradient-to-r from-yellow-500 to-amber-400 hover:from-yellow-400 hover:to-amber-300 text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <div v-if="downloading" class="w-4 h-4 border-2 border-slate-900/50 border-t-slate-900 rounded-full animate-spin"></div>
-                    <Icon v-else name="mdi:download" class="w-4 h-4" />
-                    <span>{{ downloading ? 'Загрузка файла...' : '$ download_certificate.pdf' }}</span>
+                    <div v-if="downloading" class="w-3.5 h-3.5 border-2 border-slate-900/40 border-t-slate-900 rounded-full animate-spin"></div>
+                    <Icon v-else name="mdi:download" class="w-3.5 h-3.5" />
+                    {{ downloading ? 'Загрузка...' : '$ download_certificate.pdf' }}
                   </button>
                 </div>
-              </div>
 
-              <!-- Сертификат грузится -->
-              <div v-else class="mb-6">
-                <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-4 sm:p-5 flex items-center gap-3">
-                  <div class="w-5 h-5 border-2 border-yellow-400/50 border-t-yellow-400 rounded-full animate-spin shrink-0"></div>
+                <div v-else class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex items-center gap-3">
+                  <div class="w-4 h-4 border-2 border-yellow-400/40 border-t-yellow-400 rounded-full animate-spin shrink-0"></div>
                   <div>
-                    <div class="text-slate-300 font-mono text-sm">Сертификат формируется</div>
+                    <div class="text-slate-300 text-sm">Сертификат формируется</div>
                     <div class="text-slate-500 font-mono text-xs mt-0.5">Обычно занимает несколько секунд</div>
                   </div>
                 </div>
               </div>
 
-              <!-- ===== БЛОК МЕДАЛИ ===== -->
+              <!-- Медаль -->
               <template v-if="medal">
-                <!-- Разделитель: badge -->
-                <div class="flex items-center gap-3 mb-6">
-                  <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
-                  <span class="text-slate-600 font-mono text-xs">badge</span>
-                  <div class="flex-1 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+                <div class="text-slate-600 font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <div class="flex-1 h-px bg-slate-800"></div>
+                  badge
+                  <div class="flex-1 h-px bg-slate-800"></div>
                 </div>
 
-                <div class="mb-6">
-                  <div class="relative bg-slate-800/60 border border-emerald-500/30 rounded-xl p-4 sm:p-5 overflow-hidden">
-                    <!-- Декоративный угол -->
-                    <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 blur-xl pointer-events-none"></div>
-                    <div class="absolute top-0 right-0 border-t-2 border-r-2 border-emerald-500/30 w-8 h-8 rounded-tr-xl pointer-events-none"></div>
-
-                    <div class="flex items-center gap-4">
-                      <!-- Иконка медали -->
-                      <div class="relative shrink-0">
-                        <div class="absolute inset-0 bg-emerald-500/20 rounded-full blur-md animate-pulse"></div>
-                        <div class="relative w-14 h-14 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center">
-                          <img
-                            v-if="medal.imageUrl"
-                            :src="medal.imageUrl"
-                            :alt="medal.name"
-                            class="w-9 h-9 object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                          />
-                          <Icon v-else name="mdi:medal" class="w-8 h-8 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                        </div>
-                      </div>
-
-                      <!-- Текст -->
-                      <div class="flex-1 min-w-0">
-                        <div class="text-emerald-400 font-mono text-xs font-bold tracking-wider uppercase mb-0.5">Значок получен</div>
-                        <div class="text-white font-semibold text-sm sm:text-base break-words">{{ medal.name }}</div>
-                        <div v-if="medal.description" class="text-slate-400 font-mono text-xs mt-1 leading-relaxed">{{ medal.description }}</div>
+                <div class="bg-slate-800/50 border border-emerald-500/20 rounded-xl p-4 mb-4">
+                  <div class="flex items-center gap-3 mb-4">
+                    <div class="relative shrink-0">
+                      <div class="absolute inset-0 bg-emerald-500/15 rounded-full blur-md"></div>
+                      <div class="relative w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center">
+                        <img v-if="medal.imageUrl" :src="medal.imageUrl" :alt="medal.name" class="w-7 h-7 object-contain" />
+                        <Icon v-else name="mdi:medal" class="w-6 h-6 text-emerald-400" />
                       </div>
                     </div>
-
-                    <!-- Кнопка надеть / снять -->
-                    <button
-                      @click="toggleEquip"
-                      class="mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-sm font-semibold transition-all border"
-                      :class="isEquipped
-                        ? 'bg-slate-700 border-slate-500 text-slate-300 hover:bg-slate-600 hover:text-white'
-                        : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50'"
-                    >
-                      <span
-                        class="w-2 h-2 rounded-full"
-                        :class="isEquipped ? 'bg-slate-400 animate-pulse' : 'bg-emerald-400'"
-                      ></span>
-                      {{ isEquipped ? '$ unequip_badge.sh' : '$ equip_badge.sh' }}
-                    </button>
-
-                    <!-- Индикатор надета -->
-                    <div v-if="isEquipped" class="mt-3 flex items-center justify-center gap-2 text-emerald-400 font-mono text-xs">
-                      <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse inline-block"></span>
-                      Медалька надета на аватар
+                    <div class="flex-1 min-w-0">
+                      <div class="text-emerald-400 font-mono text-[10px] uppercase tracking-wider">Значок получен</div>
+                      <div class="text-white text-sm font-medium">{{ medal.name }}</div>
+                      <div v-if="medal.description" class="text-slate-400 text-xs mt-0.5 leading-relaxed line-clamp-2">{{ medal.description }}</div>
                     </div>
+                  </div>
+
+                  <button
+                    @click="toggleEquip"
+                    :class="[
+                      'w-full flex items-center justify-center gap-2 py-2 rounded-lg font-mono text-xs font-semibold transition-all border',
+                      isEquipped
+                        ? 'bg-slate-700/60 border-slate-600 text-slate-400 hover:text-white'
+                        : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20'
+                    ]"
+                  >
+                    <span :class="['w-1.5 h-1.5 rounded-full', isEquipped ? 'bg-slate-400' : 'bg-emerald-400 animate-pulse']"></span>
+                    {{ isEquipped ? '$ unequip_badge.sh' : '$ equip_badge.sh' }}
+                  </button>
+
+                  <div v-if="isEquipped" class="mt-2 flex items-center justify-center gap-1.5 text-emerald-400 font-mono text-[10px]">
+                    <span class="w-1 h-1 bg-emerald-400 rounded-full animate-pulse"></span>
+                    Медалька надета на аватар
                   </div>
                 </div>
               </template>
-              <!-- ===== КОНЕЦ БЛОКА МЕДАЛИ ===== -->
 
-              <!-- Кнопки действий -->
-              <div class="flex flex-col sm:flex-row gap-3">
+              <!-- Действия -->
+              <div class="flex gap-2 mt-2">
                 <NuxtLink to="/profile" class="flex-1">
-                  <button class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 text-slate-300 hover:text-white rounded-xl font-mono text-sm transition-all">
+                  <button class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white rounded-xl font-mono text-xs transition-all">
                     $ profile.sh
                   </button>
                 </NuxtLink>
                 <NuxtLink to="/courses" class="flex-1">
-                  <button class="w-full py-2.5 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-400 hover:text-emerald-300 rounded-xl font-mono text-sm transition-all">
+                  <button class="w-full py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 hover:border-emerald-500/50 text-emerald-400 hover:text-emerald-300 rounded-xl font-mono text-xs transition-all">
                     $ other_courses.sh
                   </button>
                 </NuxtLink>
               </div>
             </div>
 
-            <!-- Нижняя линия -->
-            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
           </div>
         </Transition>
       </div>
@@ -212,15 +164,14 @@ const props = defineProps({
   show:          { type: Boolean, default: false },
   courseTitle:   { type: String,  default: '' },
   certification: { type: Object,  default: null },
-  medal:         { type: Object,  default: null }   // ← добавлен проп
+  medal:         { type: Object,  default: null }
 })
 
-const emit = defineEmits(['close', 'equip'])          // ← добавлен emit
+const emit = defineEmits(['close', 'equip'])
 
 const config = useRuntimeConfig()
 const downloading = ref(false)
 
-// ─── Equip state ────────────────────────────────────────────────────────────
 const EQUIP_KEY = 'equippedBadge'
 
 const isEquipped = computed(() => {
@@ -235,10 +186,9 @@ const isEquipped = computed(() => {
 
 const toggleEquip = () => {
   if (!props.medal) return
-  emit('equip', props.medal)   // родитель сам пишет в localStorage и диспатчит событие
+  emit('equip', props.medal)
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
 const formatDate = (dateString) => {
   if (!dateString) return '—'
   return new Date(dateString).toLocaleDateString('ru-RU', {
@@ -246,26 +196,17 @@ const formatDate = (dateString) => {
   })
 }
 
-// ─── Download PDF (с токеном) ────────────────────────────────────────────────
 const handleDownload = async () => {
   if (!props.certification?.certificateCode || downloading.value) return
   downloading.value = true
   try {
     const apiBase = config.public.apiBase || config.public.baseURL || ''
     const url = `${apiBase}/certifications/${props.certification.certificateCode}/pdf`
-
-    // Получаем токен из localStorage (ключ зависит от вашего useAuth)
     const token = localStorage.getItem('authToken') || localStorage.getItem('token') || ''
-
     const response = await fetch(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
-
-    if (!response.ok) {
-      console.error('PDF download failed:', response.status)
-      return
-    }
-
+    if (!response.ok) return
     const blob = await response.blob()
     const objectUrl = URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -280,7 +221,6 @@ const handleDownload = async () => {
   }
 }
 
-// ─── Keyboard & scroll lock ──────────────────────────────────────────────────
 onMounted(() => {
   const onKeydown = (e) => { if (e.key === 'Escape') emit('close') }
   window.addEventListener('keydown', onKeydown)
@@ -294,15 +234,12 @@ watch(() => props.show, (val) => {
 
 <style scoped>
 .modal-fade-enter-active,
-.modal-fade-leave-active { transition: opacity 0.25s ease; }
+.modal-fade-leave-active { transition: opacity 0.2s ease; }
 .modal-fade-enter-from,
 .modal-fade-leave-to { opacity: 0; }
 
 .modal-scale-enter-active { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.modal-scale-leave-active { transition: all 0.2s ease; }
-.modal-scale-enter-from { opacity: 0; transform: scale(0.88) translateY(16px); }
-.modal-scale-leave-to   { opacity: 0; transform: scale(0.94) translateY(8px); }
-
-@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.animate-spin-slow { animation: spin-slow 4s linear infinite; }
+.modal-scale-leave-active { transition: all 0.15s ease; }
+.modal-scale-enter-from { opacity: 0; transform: scale(0.9) translateY(12px); }
+.modal-scale-leave-to   { opacity: 0; transform: scale(0.96); }
 </style>
